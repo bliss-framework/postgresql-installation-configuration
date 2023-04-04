@@ -4,7 +4,6 @@
 > - https://www.tecmint.com/install-postgresql-rocky-linux/
 
 
-
 ## Installation and initialization
 
 ```
