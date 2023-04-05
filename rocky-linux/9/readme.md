@@ -4,7 +4,6 @@
 > - https://www.tecmint.com/install-postgresql-rocky-linux/
 
 
-
 ## Installation and initialization
 
 ```
@@ -69,7 +68,7 @@ cat /proc/cpuinfo | grep -o ".\{0,0\}pdpe1gb.\{0,0\}" | head -n 1
 ```
 
 > - Disable Transparent Huge Pages, PostgreSQL doesn't like them
-> - Update grup configuration
+> - Update grub configuration
 
 _/etc/default/grub_
 ```
