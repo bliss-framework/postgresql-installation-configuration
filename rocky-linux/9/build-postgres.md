@@ -38,5 +38,6 @@ cd /home/postgres/pgsodium
 wget https://github.com/michelp/pgsodium/archive/refs/tags/v3.1.6.tar.gz
 tar -xzf v3.1.6.tar.gz -C /home/postgres/pgsodium
 rm v3.1.6.tar.gz
-
+cd pgsodium-3.1.6
+make -j 4 && make install
 ```
