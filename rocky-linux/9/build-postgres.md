@@ -26,18 +26,3 @@ chown postgres:postgres -R /home/postgres
 
 cd ..
 ```
-
-## Installation of PGSodium
-
-Continuation of the installation process
-```
-curl -s -L https://download.libsodium.org/libsodium/releases/libsodium-1.0.18.tar.gz | tar zxvf - && cd libsodium-1.0.18 && ./configure && make check && make -j 4 install
-
-mkdir -p /home/postgres/pgsodium
-cd /home/postgres/pgsodium
-wget https://github.com/michelp/pgsodium/archive/refs/tags/v3.1.6.tar.gz
-tar -xzf v3.1.6.tar.gz -C /home/postgres/pgsodium
-rm v3.1.6.tar.gz
-cd pgsodium-3.1.6
-make -j 4 && make install
-```
