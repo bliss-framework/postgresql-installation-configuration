@@ -7,5 +7,7 @@ A compilation of different installation and configuration guides and scripts for
 - [RockyLinux 9](./rocky-linux/9)
   - [Installation from repo](./rocky-linux/9)
   - [Build from Github source](./rocky-linux/9/build-postgres.md)
-  - [Installation of PostGIS](./rocky-linux/9/postgis.md)
   - [Post installation configuration](./rocky-linux/9/post-installation.md)
+  - [Installation of PostGIS](./rocky-linux/9/postgis.md)
+  - [Build and installation of PGSodium](./rocky-linux/9/build-pgsodium.md)
+  
