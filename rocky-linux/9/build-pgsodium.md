@@ -65,7 +65,7 @@ Once extracted, copy files like this
 	+ If you installed PostgreSQL with _dnf_ then it should be this location _/usr/pgsql-15/lib_
 - Rename _pgsodium_getkey_urandom.sh_ to _pgsodium_getkey_ and place it to extension folder on production server
 	+ If you installed PostgreSQL with _dnf_ then it should be this location _/usr/pgsql-15/share/extension/_
-	+ Change pgsodium_getkey to executable with chmod +x ./pgsodium_getkey
+	+ Change _pgsodium_getkey_ to executable with ```chmod +x ./pgsodium_getkey```
 
 
 According to [Server Key Management](https://github.com/michelp/pgsodium#server-key-management) section of PGSodium documentation, you need to add pgsodium to _shared_preload_libraries_ configuration value in your PostgreSQL configuration file. This way pgsodium_getkey should be started automatically with server startup and ensure there is a server key generated in PostgreSQL data folder
