@@ -16,3 +16,12 @@ After configuration of _postgresql.conf_
 ```
 systemctl restart postgresql-15.service
 ```
+
+## Firewall settings
+
+You might need to enable PostgreSQL ports on firewall, you can use this script.
+
+```
+firewall-cmd --zone=public --add-service=postgresql --permanent
+firewall-cmd --reload
+```
