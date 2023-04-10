@@ -25,3 +25,14 @@ You might need to enable PostgreSQL ports on firewall, you can use this script.
 firewall-cmd --zone=public --add-service=postgresql --permanent
 firewall-cmd --reload
 ```
+
+
+## Allow postgres-15 to bind to ip address
+
+_/var/lib/pgsql/15/data/postgresql.conf_
+```
+#change listen_addresses to * to bind to all IP addresses
+
+listen_addresses='*'
+
+```
