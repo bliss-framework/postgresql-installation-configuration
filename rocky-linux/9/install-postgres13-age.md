@@ -20,7 +20,7 @@ sudo dnf install -y postgresql13-server
 # INSTALL DEVELOPMENT HEADERS AND LIBRARIES
 sudo dnf install -y epel-release
 sudo dnf --enablerepo=crb install -y perl-IPC-Run
-sudo dnf install -y postgresql13-devel.x86_64 redhat-rpm-config flex bison perl-FindBin
+sudo dnf install -y postgresql13-devel.x86_64 redhat-rpm-config flex bison perl-FindBin perl-lib
 sudo dnf install -y ccache
 
 psql -V
@@ -31,8 +31,7 @@ sudo /usr/pgsql-13/bin/postgresql-13-setup initdb
 
 ```
 wget https://github.com/apache/age/releases/download/PG13%2Fv1.3.0-rc0/apache-age-1.3.0-src.tar.gz
-mkdir -p /home/postgres/age
-tar -xzf apache-age-1.3.0-src.tar.gz -C /home/postgres/age
+tar -xzf apache-age-1.3.0-src.tar.gz
 cd apache-age-1.3.0
 ```
 
