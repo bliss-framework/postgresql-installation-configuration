@@ -12,12 +12,6 @@ sudo dnf update -y
 sudo dnf -qy module disable postgresql
 sudo dnf install -y postgresql13-server
 
-# INSTALL DEVELOPMENT HEADERS AND LIBRARIES
-sudo dnf install -y epel-release
-sudo dnf --enablerepo=crb install -y perl-IPC-Run
-sudo dnf install -y postgresql13-devel.x86_64 redhat-rpm-config flex bison perl-FindBin perl-lib
-sudo dnf install -y ccache
-
 psql -V
 sudo /usr/pgsql-13/bin/postgresql-13-setup initdb
 ```
