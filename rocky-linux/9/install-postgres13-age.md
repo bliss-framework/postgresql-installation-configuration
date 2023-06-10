@@ -5,12 +5,15 @@
 
 > Based on various sources
 > - https://www.tecmint.com/install-postgresql-rocky-linux/
+> - Rocky Linux Minimal installation is used
 
 > This installation is for AGE compilation and extraction of compiled outputs of AGE that can be put on production server
 
 ## Installation and initialization
 
 ```
+sudo dnf install -y tar wget
+
 sudo dnf module list postgresql
 sudo dnf install https://download.postgresql.org/pub/repos/yum/reporpms/EL-9-x86_64/pgdg-redhat-repo-latest.noarch.rpm -y
 sudo dnf update -y
