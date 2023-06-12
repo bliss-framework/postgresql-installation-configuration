@@ -45,3 +45,24 @@ cd apache-age-1.3.0
 export PATH=$PATH:/usr/pgsql-13/bin
 make install
 ```
+
+
+## Transfer output files to Production server
+
+AGE files are in two folders `/usr/pgsql-13/lib` and `/usr/pgsql-13/share/extension`.
+
+From `/usr/pgsql-13/lib` transfer these files and folders
+```
+./bitcode
+age.so
+```
+
+From  `/usr/pgsql-13/share` transfer these files
+```
+age.control
+age--1.3.0.sql
+```
+
+After you transfer these files to Production server don't forget to reset permissions and ownership
+
+
