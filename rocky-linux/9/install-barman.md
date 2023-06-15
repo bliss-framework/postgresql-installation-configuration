@@ -5,9 +5,9 @@
 
 > Installation expects two machines, one for Barman and one running PostgreSQL instance
 
-## Installation of Barman on a new machine
+## [Barman server] Installation of Barman on a new machine
 
-```
+```bash
 
 sudo dnf -y install https://download.postgresql.org/pub/repos/yum/reporpms/EL-9-x86_64/pgdg-redhat-repo-latest.noarch.rpm 
 sudo dnf -y update
@@ -21,84 +21,164 @@ sudo dnf -y install barman
 
 ```
 
+## [PostgreSQL server] Configuration of PostgreSQL Database
+
+Steps done under postgres account (`su - postgres`)
+
+```bash
+createuser -s -P barman
+# enter password
 
 
+# create streaming user if you are planning to use it
+createuser --replication -P barman_streaming
 
-## Securing _postgres_ account
+# IF YOU HAVE PostgreSQL Server version < 15 Beta RUN THIS COMMAND
+psql << EOF
+GRANT EXECUTE ON FUNCTION pg_start_backup(text, boolean, boolean) to barman;
+GRANT EXECUTE ON FUNCTION pg_stop_backup() to barman;
+GRANT EXECUTE ON FUNCTION pg_stop_backup(boolean, boolean) to barman;
+GRANT EXECUTE ON FUNCTION pg_switch_wal() to barman;
+GRANT EXECUTE ON FUNCTION pg_create_restore_point(text) to barman;
 
-> Update password in SQL script below
+GRANT pg_read_all_settings TO barman;
+GRANT pg_read_all_stats TO barman;
+EOF
 
-```
-sudo passwd postgres
-su - postgres
-psql -c "ALTER USER postgres WITH PASSWORD 'your-password';"
-```
+# IF YOU HAVE PostgreSQL Server version >= 15 Beta RUN THIS COMMAND
+psql << EOF
+GRANT EXECUTE ON FUNCTION pg_backup_start(text, boolean) to barman;
+GRANT EXECUTE ON FUNCTION pg_backup_stop(boolean) to barman;
+GRANT EXECUTE ON FUNCTION pg_switch_wal() to barman;
+GRANT EXECUTE ON FUNCTION pg_create_restore_point(text) to barman;
 
-## (OPTIONAL) Install Postgrestuner.pl
-> - https://github.com/jfcoz/postgresqltuner
-```
-sudo dnf install epel-release -y
-sudo dnf install postgresqltuner -y
-```
-
-> BEFORE RUNNING THIS TOOL
-> Create ~/.pgpass for postgres account so no passwords are visible in logs/console history
-> https://www.postgresql.org/docs/current/libpq-pgpass.html
-> OR ran under postgres user
-
-_~/.pgpass_
-```
-localhost:5342:template1:postgres:your-password
-```
-
-## OS Configuration
-
-> - Based on https://www.enterprisedb.com/blog/improving-postgresql-performance-without-making-changes-postgresql
-> - https://www.centlinux.com/2021/08/disable-transparent-huge-pages-centos-rhel-8.html
-> - https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html/virtualization_tuning_and_optimization_guide/sect-virtualization_tuning_optimization_guide-memory-huge_pages-1gb-runtime
-> - Test what HugePage memory sizes are supported
-
-If first line returns _pse_ 2MB page size is supported
-If second line returns pdpe1gb 1GB page size is supported - BETTER VARIANT for bigger servers
-```
-cat /proc/cpuinfo | grep -o ".\{0,0\}pse.\{0,0\}" | head -n 1
-cat /proc/cpuinfo | grep -o ".\{0,0\}pdpe1gb.\{0,0\}" | head -n 1
+GRANT pg_read_all_settings TO barman;
+GRANT pg_read_all_stats TO barman;
+EOF
 ```
 
-> - Disable Transparent Huge Pages, PostgreSQL doesn't like them
-> - Update grub configuration
+> If you are planning to user WAL replication you might need to configure `max_wal_senders` in `postgresql.conf` to number bigger than 0
 
-_/etc/default/grub_
-```
-# add following configurations as last parameters in GRUB_CMDLINE_LINUX
-# this line disables transparent hugepages and allocated 4 1GB blocks and 2*1024MB memory blocks
 
-transparent_hugepage=never default_hugepagesz=1G hugepagesz=1G hugepages=4 hugepagesz=2M hugepages=1024
-```
+**!!! Update pg_hba.conf file for barman/barman_streaming so they can connect !!!**
 
-After that run this command to update grup settings and reboot
+For standard backup account, for example
 ```
-grub2-mkconfig -o /boot/grub2/grub.cfg
-reboot
+host    postgres             barman             10.11.12.0/24             scram-sha-256
 ```
 
-To check if the settings are valid you could run this command, but it only shows 4 1GB block allocated, if you use them
+For streaming account, for example 
 ```
-grep Huge /proc/meminfo
-```
-
-You can also check _/sys/devices/system/node/node0/hugepages_ where you'll find, for example, _nr_hugepages_ for total number of  1GB huge pages in _/hugepages-1048576kB_ folder and number of free 1GB huge pages in _free_hugepages_ file
-
-![image](https://user-images.githubusercontent.com/6738956/229386364-40d8daeb-b80b-4c8d-b78f-31a841e7569e.png)
-
-> System configuration
-> 
-
-
-This change in _/etc/sysctl.conf_ will disable memory overcommitment 
-```
-# PostgreSQL required settings
-vm.overcommit_memory=2
+host    replication     barman_streaming             10.11.12.0/24             scram-sha-256
 ```
 
-## 
+Reload `pg_hba.conf` with 
+```bash
+psql -c "select pg_reload_conf();"
+```
+
+
+## [Barman server] Create `~barman/.pgpass` for secure connection
+
+```bash
+cd ~barman
+
+# create records for both users (or the one you use) in this format
+# hostname:port:*:username:password
+
+nano .pgpass
+
+```
+
+## [Barman server] Test connection
+
+Run
+```
+
+# To test standard backup account connection
+
+psql -h my-db-server.com -U barman -d postgres -c "select current_user;"
+
+# Sample result
+barman
+
+
+
+# To test WAL streaming account connection
+
+psql "host=my-db-server.com user=barman_streaming dbname=postgres replication=database" -c "IDENTIFY_SYSTEM;"
+
+# Sample result
+#      systemid       | timeline |  xlogpos   |  dbname
+#---------------------+----------+------------+----------
+# 7050253711504958258 |        1 | 7/9C9D6E28 | postgres
+
+
+```
+
+## [Barman server] Create `my-db-server.com` Barman configuration
+
+
+This configuration is only for "Streaming-Only" setup, see the official documentation for all possible backup scenarios
+
+```bash
+
+nano /etc/barman.d/my-db-server.com.conf
+
+## insert this text and configure properly, server name in [] is crucial, it is used by every command
+
+[my-db-server.com]
+description =  "My DB Server - Streaming-Only"
+conninfo = host=my-db-server.com user=barman dbname=postgres
+streaming_conninfo = host=my-db-server.com user=barman_streaming
+backup_method = postgres
+streaming_archiver = on
+slot_name = barman
+path_prefix = /usr/pgsql-15/bin  # crucial to point to correct folder, 15 libraries seems working just fine with v14 of PostgreSQL Server
+
+```
+
+After that is done run under `barman` user
+
+```bash
+barman check my-db-server.com
+```
+
+Almost all should be green except
+
+``` 
+WAL archive: FAILED (please make sure WAL shipping is setup)
+replication slot: FAILED (replication slot 'barman' doesn't exist. Please execute 'barman receive-wal --create-slot my-db-server.com')
+```
+
+You can create replication socket with given command, this will create a replication slot on PostgreSQL Server just for barman
+
+```
+barman receive-wal --create-slot my-db-server.com
+```
+
+Run the check again
+```bash
+barman check my-db-server.com
+```
+
+All should be green except
+
+```
+WAL archive: FAILED (please make sure WAL shipping is setup)
+```
+
+Run this command to fix it
+
+```
+barman switch-xlog --force --archive my-db-server.com
+```
+
+Now all should be working...
+
+
+Run this command to do a full backup of the server
+
+```
+barman backup my-db-server.com
+```
