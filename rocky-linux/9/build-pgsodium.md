@@ -69,3 +69,11 @@ Once extracted, copy files like this
 
 
 According to [Server Key Management](https://github.com/michelp/pgsodium#server-key-management) section of PGSodium documentation, you need to add pgsodium to _shared_preload_libraries_ configuration value in your PostgreSQL configuration file. This way pgsodium_getkey should be started automatically with server startup and ensure there is a server key generated in PostgreSQL data folder
+
+
+## DON'T FORGET TO FIX LIBRARY PERMISSIONS ON PRODUCTION SERVER
+
+Probably with a script similar to this, but it depends on installation
+```
+ chmod u+rwx,g+rx,o+rx *
+```
