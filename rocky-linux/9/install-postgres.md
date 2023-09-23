@@ -53,6 +53,16 @@ _~/.pgpass_
 localhost:5342:template1:postgres:your-password
 ```
 
+
+## (OPTIONAL) Install Postgrestuner.pl - MANUALLY
+
+```bash
+yum install -y perl-DBD-Pg
+dnf install perl-Memoize
+
+
+https://raw.githubusercontent.com/jfcoz/postgresqltuner/master/postgresqltuner.pl
+```
 ## OS Configuration
 
 > - Based on https://www.enterprisedb.com/blog/improving-postgresql-performance-without-making-changes-postgresql
