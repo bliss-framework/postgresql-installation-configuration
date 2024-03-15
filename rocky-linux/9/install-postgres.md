@@ -70,12 +70,15 @@ cat /proc/cpuinfo | grep -o ".\{0,0\}pdpe1gb.\{0,0\}" | head -n 1
 > - Disable Transparent Huge Pages, PostgreSQL doesn't like them
 > - Update grub configuration
 
+> - to find the proper number of 2M huge pages, you can run `/usr/pgsql-15/bin/postgres --share_buffers=6GB -D $PGDATA -C shared_memory_size_in_huge_pages`. The server has to be turned off, or you can run it on another machine
+
 _/etc/default/grub_
 ```
 # add following configurations as last parameters in GRUB_CMDLINE_LINUX
-# this line disables transparent hugepages and allocated 4 1GB blocks and 2*1024MB memory blocks
+# this line disables transparent hugepages and allocated 2*1024MB memory blocks - there should # be enough blocks for shared_buffers
+# For example, if shared_buffers are set to 6GB then it has to be 3000 2M huge pages.
 
-transparent_hugepage=never default_hugepagesz=1G hugepagesz=1G hugepages=4 hugepagesz=2M hugepages=1024
+transparent_hugepage=never default_hugepagesz=2M hugepagesz=2M hugepages=1024
 ```
 
 After that run this command to update grup settings and reboot
